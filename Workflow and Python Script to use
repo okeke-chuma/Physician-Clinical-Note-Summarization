@@ -1,0 +1,116 @@
+Workflow:
+  On your device, download Anaconda (https://www.anaconda.com/download), after download, launch anaconda navigator. 
+  Click Jupyter Lab to launch it
+  Go to File --> New --> Notebook
+
+Before runing, save the file as a txt file or word file. The file path you modify is line 14
+Copy this code from Line 10 to line 32, and paste, then execute.
+
+The program will:
+  Read the file from your device
+  Generate a summary
+  Print Chief Complaint, Diagnosis, Treatment, and Follow-up
+
+###############################################################################################
+#Run File
+!pip install python-docx transformers torch
+from transformers import pipeline
+from docx import Document
+
+# Path to your Word document
+file_path = r"C:\Users\YourName\Documents\Clinical_Note.docx"
+
+# Read Word document
+doc = Document(file_path)
+clinical_note = "\n".join([para.text for para in doc.paragraphs])
+
+# Load summarization model
+summarizer = pipeline(
+    "summarization",
+    model="facebook/bart-large-cnn"
+)
+
+# Generate summary
+summary = summarizer(
+    clinical_note,
+    max_length=200,
+    min_length=50,
+    do_sample=False
+)
+
+print(summary[0]["summary_text"])
+
+###############################################################################################
+
+#Option 2: Read a Text File (.txt). This is for the python script to read the text file on the location you point it to (Line 50)
+
+from transformers import pipeline
+
+# Path to text file
+file_path = r"C:\Users\YourName\Documents\Clinical_Note.txt"
+
+# Read text file
+with open(file_path, "r", encoding="utf-8") as file:
+    clinical_note = file.read()
+
+# Load summarization model
+summarizer = pipeline(
+    "summarization",
+    model="facebook/bart-large-cnn"
+)
+
+# Generate summary
+summary = summarizer(
+    clinical_note,
+    max_length=200,
+    min_length=50,
+    do_sample=False
+)
+
+print(summary[0]["summary_text"])
+
+#########################################################################################################################
+#This option helps detect the file type, if it is Word or Text. Modify line 79 based on the location whre you saved the input file.
+
+from transformers import pipeline
+from docx import Document
+import os
+
+file_path = r"C:\Users\YourName\Documents\Clinical_Note.docx"
+
+# Read file based on extension
+extension = os.path.splitext(file_path)[1].lower()
+
+if extension == ".txt":
+    with open(file_path, "r", encoding="utf-8") as file:
+        clinical_note = file.read()
+
+elif extension == ".docx":
+    doc = Document(file_path)
+    clinical_note = "\n".join(
+        [para.text for para in doc.paragraphs]
+    )
+
+else:
+    raise ValueError("Only .txt and .docx files are supported")
+
+# Load model
+summarizer = pipeline(
+    "summarization",
+    model="facebook/bart-large-cnn"
+)
+
+# Summarize
+summary = summarizer(
+    clinical_note,
+    max_length=200,
+    min_length=50,
+    do_sample=False
+)
+
+print("\n=== CLINICAL NOTE SUMMARY ===\n")
+print(summary[0]["summary_text"])
+
+
+#########################################################################################################################
+
